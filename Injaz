@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفيقي: نظام جودة الحياة المتكامل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f0f4f8;
+            color: #1e293b;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .nav-active {
+            color: #6366f1;
+            font-weight: 700;
+        }
+        .hidden-section {
+            display: none;
+        }
+        .progress-ring {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+
+    <!-- Notification Overlay -->
+    <div id="ai-notif" class="fixed top-4 left-4 right-4 z-50 transform translate-y-[-150%] transition-transform duration-500">
+        <div class="bg-indigo-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between">
+            <div class="flex items-center space-x-3 rtl:space-x-reverse">
+                <span class="text-2xl">💡</span>
+                <p id="notif-text" class="text-sm font-medium"></p>
+            </div>
+            <button onclick="closeNotif()" class="text-white/70">✕</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="p-6 max-w-4xl mx-auto flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">رفيقي الذكي</h1>
+            <p id="current-date" class="text-gray-500 text-sm font-light"></p>
+        </div>
+        <div class="flex items-center space-x-2 rtl:space-x-reverse">
+            <div class="text-left">
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest">مستوى الإنجاز</p>
+                <p class="font-bold text-indigo-600" id="completion-rate">0%</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4">
+        
+        <!-- Tab: HOME -->
+        <div id="section-home" class="space-y-6">
+            <!-- Values Dashboard -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="glass-card p-4 text-center border-b-4 border-indigo-500">
+                    <span class="block text-indigo-600 font-bold">الإيمان</span>
+                    <div class="h-1 bg-indigo-100 mt-2 rounded-full overflow-hidden">
+                        <div id="faith-progress" class="h-full bg-indigo-500 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="glass-card p-4 text-center border-b-4 border-purple-500">
+                    <span class="block text-purple-600 font-bold">التوازن</span>
+                    <div class="h-1 bg-purple-100 mt-2 rounded-full overflow-hidden">
+                        <div id="balance-progress" class="h-full bg-purple-500 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="glass-card p-4 text-center border-b-4 border-pink-500">
+                    <span class="block text-pink-600 font-bold">الإنجاز</span>
+                    <div class="h-1 bg-pink-100 mt-2 rounded-full overflow-hidden">
+                        <div id="success-progress" class="h-full bg-pink-500 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Manager List -->
+            <section class="glass-card p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold flex items-center">
+                        <span class="bg-indigo-100 p-1 rounded ml-2">🎯</span> قائمة المهام
+                    </h2>
+                    <span class="text-xs text-gray-400">اليوم</span>
+                </div>
+                <div id="tasks-container" class="space-y-3">
+                    <!-- Tasks injected by JS -->
+                </div>
+            </section>
+
+            <!-- Focus Zone -->
+            <section class="glass-card p-6 bg-gradient-to-br from-indigo-50 to-white">
+                <h2 class="text-md font-bold mb-4 flex items-center">
+                    <span class="bg-blue-100 p-1 rounded ml-2">🧘‍♀️</span> جوّك الخاص (التركيز)
+                </h2>
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <div class="relative w-32 h-32 flex items-center justify-center">
+                        <svg class="w-full h-full">
+                            <circle cx="64" cy="64" r="60" stroke="#e2e8f0" stroke-width="8" fill="transparent" />
+                            <circle id="timer-circle" cx="64" cy="64" r="60" stroke="#6366f1" stroke-width="8" fill="transparent" stroke-dasharray="377" stroke-dashoffset="377" class="progress-ring" />
+                        </svg>
+                        <span id="timer-display" class="absolute text-xl font-bold">15:00</span>
+                    </div>
+                    <button id="timer-btn" onclick="toggleTimer()" class="w-full py-3 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200">ابدئي الجلسة</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Tab: ACADEMY -->
+        <div id="section-academy" class="hidden-section space-y-6">
+            <h2 class="text-2xl font-bold mb-4">أكاديمية الذات</h2>
+            
+            <!-- Category Selector -->
+            <div class="flex space-x-2 overflow-x-auto pb-2 rtl:space-x-reverse no-scrollbar">
+                <button onclick="filterLessons('all')" class="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">الكل</button>
+                <button onclick="filterLessons('charisma')" class="bg-white text-gray-600 px-4 py-2 rounded-full text-sm border whitespace-nowrap">الكاريزما</button>
+                <button onclick="filterLessons('psychology')" class="bg-white text-gray-600 px-4 py-2 rounded-full text-sm border whitespace-nowrap">النفسية</button>
+                <button onclick="filterLessons('productivity')" class="bg-white text-gray-600 px-4 py-2 rounded-full text-sm border whitespace-nowrap">تطوير الذات</button>
+            </div>
+
+            <div id="lessons-grid" class="grid grid-cols-1 gap-4">
+                <!-- Lessons injected by JS -->
+            </div>
+        </div>
+
+        <!-- Tab: PROFILE & INSIGHTS -->
+        <div id="section-profile" class="hidden-section space-y-6">
+            <section class="glass-card p-8 text-center bg-gradient-to-b from-white to-indigo-50">
+                <div class="w-24 h-24 bg-indigo-200 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl">👑</div>
+                <h2 class="text-xl font-bold">سجل الرحلة</h2>
+                <p class="text-gray-500 text-sm">أنتِ تتقدمين نحو ذات أفضل كل يوم</p>
+            </section>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="glass-card p-4">
+                    <p class="text-xs text-gray-400">إجمالي المهام</p>
+                    <p class="text-2xl font-bold" id="stat-total-tasks">0</p>
+                </div>
+                <div class="glass-card p-4">
+                    <p class="text-xs text-gray-400">أيام الالتزام</p>
+                    <p class="text-2xl font-bold text-green-500">1</p>
+                </div>
+            </div>
+
+            <section class="glass-card p-6">
+                <h3 class="font-bold mb-4">مساحة الامتنان</h3>
+                <div id="gratitude-list" class="space-y-2 mb-4">
+                    <!-- Saved gratitude -->
+                </div>
+                <div class="flex space-x-2 rtl:space-x-reverse">
+                    <input id="grat-input" type="text" class="flex-1 bg-gray-50 p-3 rounded-xl text-sm outline-none border focus:border-indigo-300" placeholder="أنا ممتنة لـ...">
+                    <button onclick="addGratitude()" class="bg-gray-800 text-white px-4 rounded-xl">حفظ</button>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Navigation -->
+    <nav class="fixed bottom-6 left-6 right-6 h-16 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl flex justify-around items-center border border-gray-100 z-40">
+        <button onclick="showTab('home')" id="nav-home" class="nav-active flex flex-col items-center">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span class="text-[10px] mt-1">اليوم</span>
+        </button>
+        <button onclick="showTab('academy')" id="nav-academy" class="text-gray-400 flex flex-col items-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            <span class="text-[10px] mt-1">الأكاديمية</span>
+        </button>
+        <button onclick="showTab('profile')" id="nav-profile" class="text-gray-400 flex flex-col items-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            <span class="text-[10px] mt-1">الإحصائيات</span>
+        </button>
+    </nav>
+
+    <script>
+        // --- DATA ---
+        const tasks = [
+            { id: 1, text: "أذكار الصباح والمساء", val: "faith", done: false },
+            { id: 2, text: "قراءة صفحات من كتابك الحالي", val: "success", done: false },
+            { id: 3, text: "نشاط حركي (15 دقيقة)", val: "balance", done: false },
+            { id: 4, text: "تمرين الامتنان", val: "faith", done: false },
+            { id: 5, text: "جلسة هدوء (جوي الخاص)", val: "balance", done: false }
+        ];
+
+        const lessons = [
+            { id: 1, title: "فن الكاريزما: قوة الصمت", category: "charisma", text: "الصمت في الوقت المناسب يعطي هيبة أكبر من الكلام المستمر. تعلمي الاستماع بتركيز." },
+            { id: 2, title: "برمجة الإيجابية: الامتنان الاستباقي", category: "psychology", text: "اشكري الله على نعم لم تأتِ بعد بيقين أنها قادمة. هذا يبرمج عقلك على التفاؤل المطلق." },
+            { id: 3, title: "إدارة المهام: قاعدة الـ 5 ثواني", category: "productivity", text: "إذا فكرتِ في مهمة، ابدئي فيها خلال 5 ثوانٍ قبل أن يختلق عقلك أعذاراً للتسويف." },
+            { id: 4, title: "الكاريزما: لغة العيون", category: "charisma", text: "التواصل البصري الودود يبني جسور الثقة فوراً مع من حولك." }
+        ];
+
+        const aiTips = [
+            "تذكري: الإنجاز يبدأ بقرار وليس بظرف.",
+            "هل شربتِ الماء اليوم؟ جسدك يحتاج التوازن.",
+            "ابتسمي الآن، أنتِ تبنين مستقبلاً رائعاً.",
+            "كل خطوة صغيرة اليوم هي قفزة كبيرة غداً."
+        ];
+
+        // --- STATE ---
+        let timerActive = false;
+        let timeLeft = 15 * 60;
+        let timerInterval;
+
+        // --- CORE FUNCTIONS ---
+        function showTab(tabId) {
+            document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden-section'));
+            document.getElementById(`section-${tabId}`).classList.remove('hidden-section');
+            
+            // Nav styling
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('nav-active');
+                btn.classList.add('text-gray-400');
+            });
+            document.getElementById(`nav-${tabId}`).classList.add('nav-active');
+            document.getElementById(`nav-${tabId}`).classList.remove('text-gray-400');
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = tasks.map(task => `
+                <div class="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-transparent hover:border-indigo-100 transition-all">
+                    <div class="flex items-center space-x-3 rtl:space-x-reverse">
+                        <input type="checkbox" onchange="toggleTask(${task.id})" ${task.done ? 'checked' : ''} 
+                            class="w-6 h-6 rounded-full border-2 border-indigo-200 text-indigo-600 focus:ring-indigo-500">
+                        <span class="${task.done ? 'line-through text-gray-400' : 'text-gray-700'} font-medium text-sm">${task.text}</span>
+                    </div>
+                    <span class="text-[9px] px-2 py-1 rounded bg-white shadow-sm text-gray-500">${task.val === 'faith' ? 'إيمان' : task.val === 'balance' ? 'توازن' : 'إنجاز'}</span>
+                </div>
+            `).join('');
+            updateStats();
+        }
+
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            task.done = !task.done;
+            renderTasks();
+            if(task.done) triggerNotif("عمل رائع! استمري في الإنجاز 🌟");
+        }
+
+        function updateStats() {
+            const completed = tasks.filter(t => t.done).length;
+            const rate = Math.round((completed / tasks.length) * 100);
+            document.getElementById('completion-rate').innerText = `${rate}%`;
+            document.getElementById('stat-total-tasks').innerText = completed;
+
+            // Progress bars
+            const counts = { faith: 0, balance: 0, success: 0 };
+            const totals = { faith: 0, balance: 0, success: 0 };
+            
+            tasks.forEach(t => {
+                totals[t.val]++;
+                if(t.done) counts[t.val]++;
+            });
+
+            document.getElementById('faith-progress').style.width = `${(counts.faith/totals.faith)*100}%`;
+            document.getElementById('balance-progress').style.width = `${(counts.balance/totals.balance)*100}%`;
+            document.getElementById('success-progress').style.width = `${(counts.success/totals.success)*100}%`;
+        }
+
+        function renderLessons(filter = 'all') {
+            const container = document.getElementById('lessons-grid');
+            const filtered = filter === 'all' ? lessons : lessons.filter(l => l.category === filter);
+            
+            container.innerHTML = filtered.map(lesson => `
+                <div class="glass-card p-5 border-r-4 ${lesson.category === 'charisma' ? 'border-r-yellow-400' : 'border-r-indigo-400'}">
+                    <h3 class="font-bold text-indigo-900 mb-2">${lesson.title}</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">${lesson.text}</p>
+                    <button class="mt-4 text-xs font-bold text-indigo-600 flex items-center">
+                        تم استيعاب الدرس 
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function filterLessons(cat) {
+            renderLessons(cat);
+            // Update UI buttons styling here if needed
+        }
+
+        // --- TIMER ---
+        function toggleTimer() {
+            const btn = document.getElementById('timer-btn');
+            if (timerActive) {
+                clearInterval(timerInterval);
+                btn.innerText = "استئناف";
+                btn.classList.replace('bg-red-500', 'bg-indigo-600');
+            } else {
+                timerInterval = setInterval(updateTimer, 1000);
+                btn.innerText = "إيقاف مؤقت";
+                btn.classList.replace('bg-indigo-600', 'bg-red-500');
+            }
+            timerActive = !timerActive;
+        }
+
+        function updateTimer() {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                triggerNotif("انتهت جلسة الهدوء.. عدتِ بنشاط أكبر! 🌸");
+                document.getElementById('timer-btn').innerText = "ابدئي من جديد";
+                timeLeft = 15 * 60;
+                return;
+            }
+            timeLeft--;
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('timer-display').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            
+            const offset = 377 - (377 * (15 * 60 - timeLeft)) / (15 * 60);
+            document.getElementById('timer-circle').style.strokeDashoffset = offset;
+        }
+
+        // --- NOTIFICATIONS ---
+        function triggerNotif(msg) {
+            const el = document.getElementById('ai-notif');
+            document.getElementById('notif-text').innerText = msg;
+            el.style.transform = 'translateY(0)';
+            setTimeout(closeNotif, 5000);
+        }
+
+        function closeNotif() {
+            document.getElementById('ai-notif').style.transform = 'translateY(-150%)';
+        }
+
+        // --- GRATITUDE ---
+        function addGratitude() {
+            const input = document.getElementById('grat-input');
+            if (!input.value) return;
+            const container = document.getElementById('gratitude-list');
+            const div = document.createElement('div');
+            div.className = "p-3 bg-white rounded-lg text-sm text-indigo-800 border-r-2 border-indigo-200 shadow-sm animate-pulse";
+            div.innerText = `❤️ ${input.value}`;
+            container.prepend(div);
+            input.value = "";
+            setTimeout(() => div.classList.remove('animate-pulse'), 1000);
+        }
+
+        // --- INIT ---
+        window.onload = () => {
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            document.getElementById('current-date').innerText = new Date().toLocaleDateString('ar-EG', options);
+            renderTasks();
+            renderLessons();
+            
+            // Random tip every 2 minutes
+            setInterval(() => {
+                const tip = aiTips[Math.floor(Math.random() * aiTips.length)];
+                triggerNotif(tip);
+            }, 120000);
+            
+            // Welcome message
+            setTimeout(() => triggerNotif("أهلاً بكِ.. لنبدأ يومنا بالتمسك بقيمنا الثلاث."), 1000);
+        };
+    </script>
+</body>
+</html>
+
