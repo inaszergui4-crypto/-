@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفيقي: نظام جودة الحياة المتكامل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .nav-active {
+            color: #6366f1;
+            font-weight: 700;
+        }
+        .hidden-section {
+            display: none;
+        }
+        .progress-ring {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+
+    <!-- AI Advice Notification -->
+    <div id="ai-popup" class="fixed top-4 left-4 right-4 z-50 transform -translate-y-[200%] transition-transform duration-700">
+        <div class="bg-gray-900 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-white/10">
+            <div class="flex items-center space-x-3 rtl:space-x-reverse">
+                <span class="text-xl">💡</span>
+                <p id="popup-text" class="text-xs font-medium"></p>
+            </div>
+            <button onclick="hidePopup()" class="text-white/50 text-lg">✕</button>
+        </div>
+    </div>
+
+    <!-- Top Info -->
+    <header class="p-6 max-w-xl mx-auto flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-black text-indigo-600">رفيقي الذكي</h1>
+            <p id="date-display" class="text-gray-400 text-xs mt-1"></p>
+        </div>
+        <div class="bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
+            <p class="text-[9px] text-gray-400 font-bold uppercase">معدل الإنجاز</p>
+            <p class="text-lg font-black text-indigo-500" id="score-display">0%</p>
+        </div>
+    </header>
+
+    <main class="max-w-xl mx-auto px-5 space-y-6">
+
+        <!-- TAB: HOME -->
+        <div id="tab-home" class="space-y-6">
+            <!-- Strategic Pillars -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="glass-card p-4 text-center border-b-4 border-blue-400">
+                    <span class="text-sm font-bold block mb-1">الإيمان</span>
+                    <div class="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div id="faith-p" class="h-full bg-blue-500 transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="glass-card p-4 text-center border-b-4 border-purple-400">
+                    <span class="text-sm font-bold block mb-1">التوازن</span>
+                    <div class="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div id="balance-p" class="h-full bg-purple-500 transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="glass-card p-4 text-center border-b-4 border-indigo-400">
+                    <span class="text-sm font-bold block mb-1">الإنجاز</span>
+                    <div class="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div id="success-p" class="h-full bg-indigo-500 transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks List -->
+            <section class="glass-card p-6">
+                <h2 class="font-bold mb-4 flex items-center gap-2">📌 مهامي لهذا اليوم</h2>
+                <div id="tasks-list" class="space-y-3">
+                    <!-- Tasks will be injected -->
+                </div>
+            </section>
+
+            <!-- Focus Timer -->
+            <section class="glass-card p-8 text-center relative overflow-hidden">
+                <div class="relative z-10 flex flex-col items-center">
+                    <h3 class="font-bold mb-6">مساحة الهدوء (جوي الخاص)</h3>
+                    <div class="relative w-36 h-36 flex items-center justify-center mb-6">
+                        <svg class="w-full h-full">
+                            <circle cx="72" cy="72" r="68" stroke="#f1f5f9" stroke-width="8" fill="transparent" />
+                            <circle id="timer-ring" cx="72" cy="72" r="68" stroke="#6366f1" stroke-width="8" fill="transparent" stroke-dasharray="427" stroke-dashoffset="427" class="progress-ring" />
+                        </svg>
+                        <span id="timer-text" class="absolute text-2xl font-black">15:00</span>
+                    </div>
+                    <button id="timer-btn" onclick="toggleTimer()" class="w-full py-4 gradient-bg text-white rounded-2xl font-bold shadow-lg shadow-indigo-200">ابدئي الجلسة</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB: ACADEMY -->
+        <div id="tab-academy" class="hidden-section space-y-6">
+            <h2 class="text-xl font-black">أكاديمية الذات</h2>
+            <div id="lessons-list" class="space-y-4">
+                <!-- Lessons -->
+            </div>
+        </div>
+
+        <!-- TAB: STATS -->
+        <div id="tab-stats" class="hidden-section space-y-6">
+            <div class="glass-card p-8 text-center bg-indigo-50 border-2 border-indigo-100">
+                <p class="text-4xl mb-2">💎</p>
+                <h3 class="font-bold">سجل التقدم</h3>
+                <p class="text-xs text-gray-500">متابعة يومية لأهدافك الكبرى</p>
+            </div>
+            
+            <section class="glass-card p-6">
+                <h4 class="font-bold mb-4">مساحة الامتنان</h4>
+                <div class="flex gap-2">
+                    <input id="grat-input" type="text" class="flex-1 bg-gray-50 border p-3 rounded-xl text-sm outline-none" placeholder="شيء جميل حدث اليوم...">
+                    <button onclick="addGratitude()" class="bg-gray-900 text-white px-5 rounded-xl text-sm">حفظ</button>
+                </div>
+                <div id="grat-list" class="mt-4 space-y-2"></div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Navigation -->
+    <nav class="fixed bottom-6 left-6 right-6 h-20 glass-card shadow-2xl flex justify-around items-center border border-gray-100 z-40 px-4">
+        <button onclick="navTo('home')" id="btn-home" class="nav-active flex flex-col items-center gap-1 transition-all">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span class="text-[9px] font-bold">الرئيسية</span>
+        </button>
+        <button onclick="navTo('academy')" id="btn-academy" class="text-gray-400 flex flex-col items-center gap-1 transition-all">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            <span class="text-[9px] font-bold">الدروس</span>
+        </button>
+        <button onclick="navTo('stats')" id="btn-stats" class="text-gray-400 flex flex-col items-center gap-1 transition-all">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span class="text-[9px] font-bold">الإنجاز</span>
+        </button>
+    </nav>
+
+    <script>
+        // Data Structure
+        const state = {
+            tasks: [
+                { id: 1, text: "أذكار الصباح والمساء", cat: "faith", done: false },
+                { id: 2, text: "قراءة 10 صفحات من الكتاب", cat: "success", done: false },
+                { id: 3, text: "نشاط حركي (15 دقيقة)", cat: "balance", done: false },
+                { id: 4, text: "تمرين الامتنان", cat: "faith", done: false },
+                { id: 5, text: "جلسة هدوء متكاملة", cat: "balance", done: false }
+            ],
+            lessons: [
+                { title: "كاريزما الحضور", desc: "قوة التواصل البصري الهادئ تمنحك سيطرة فورية على أي موقف." },
+                { title: "برمجة التفاؤل", desc: "عقلك ينفذ الكلمات التي تكررينها لنفسك. اختاري كلماتكِ بعناية." },
+                { title: "التوازن النفسي", desc: "لا تجعلي العمل يسرق وقت روحك؛ جلسات الهدوء هي وقود الاستمرار." }
+            ],
+            wisdom: [
+                "الإنجاز الحقيقي يبدأ بسلامك الداخلي.",
+                "لا تنسي شرب الماء، جسدك يحتاج التوازن أيضاً.",
+                "أنتِ قادرة على جعل هذا اليوم مميزاً بابتسامتك.",
+                "الله معكِ في كل خطوة، فاستبشري خيراً."
+            ]
+        };
+
+        let timerLeft = 15 * 60;
+        let timerOn = false;
+        let timerRef;
+
+        function navTo(tab) {
+            document.querySelectorAll('main > div').forEach(d => d.classList.add('hidden-section'));
+            document.getElementById(`tab-${tab}`).classList.remove('hidden-section');
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('nav-active');
+                b.classList.add('text-gray-400');
+            });
+            document.getElementById(`btn-${tab}`).classList.add('nav-active');
+            document.getElementById(`btn-${tab}`).classList.remove('text-gray-400');
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('tasks-list');
+            list.innerHTML = state.tasks.map(t => `
+                <div class="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-transparent hover:border-indigo-100 transition-all">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" onchange="toggleTask(${t.id})" ${t.done ? 'checked' : ''} class="w-6 h-6 rounded-full border-gray-300 text-indigo-600 focus:ring-0">
+                        <span class="text-sm font-medium ${t.done ? 'line-through text-gray-300' : 'text-gray-700'}">${t.text}</span>
+                    </div>
+                    <span class="text-[8px] font-bold px-2 py-1 rounded bg-white shadow-xs text-gray-400 uppercase">${t.cat === 'faith' ? 'إيمان' : t.cat === 'balance' ? 'توازن' : 'إنجاز'}</span>
+                </div>
+            `).join('');
+            updateDashboard();
+        }
+
+        function toggleTask(id) {
+            const task = state.tasks.find(t => t.id === id);
+            task.done = !task.done;
+            renderTasks();
+            if(task.done) showPopup("عمل رائع! خطوة أخرى نحو الأفضل 🌟");
+        }
+
+        function updateDashboard() {
+            const doneCount = state.tasks.filter(t => t.done).length;
+            const score = Math.round((doneCount / state.tasks.length) * 100);
+            document.getElementById('score-display').innerText = `${score}%`;
+
+            const cats = ['faith', 'balance', 'success'];
+            cats.forEach(c => {
+                const total = state.tasks.filter(t => t.cat === c).length;
+                const completed = state.tasks.filter(t => t.cat === c && t.done).length;
+                document.getElementById(`${c}-p`).style.width = `${(completed/total)*100}%`;
+            });
+        }
+
+        function renderLessons() {
+            const container = document.getElementById('lessons-list');
+            container.innerHTML = state.lessons.map(l => `
+                <div class="glass-card p-5 border-r-4 border-indigo-500">
+                    <h4 class="font-bold text-indigo-900 mb-1">${l.title}</h4>
+                    <p class="text-xs text-gray-500 leading-relaxed">${l.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('timer-btn');
+            if(timerOn) {
+                clearInterval(timerRef);
+                btn.innerText = "استئناف الجلسة";
+                btn.classList.replace('bg-red-500', 'gradient-bg');
+            } else {
+                timerRef = setInterval(updateTimer, 1000);
+                btn.innerText = "إيقاف مؤقت";
+                btn.classList.add('bg-red-500');
+                btn.classList.remove('gradient-bg');
+            }
+            timerOn = !timerOn;
+        }
+
+        function updateTimer() {
+            if(timerLeft <= 0) {
+                clearInterval(timerRef);
+                showPopup("اكتمل وقتك الخاص.. عودي بروح متجددة! 🌸");
+                timerLeft = 15 * 60;
+                return;
+            }
+            timerLeft--;
+            const m = Math.floor(timerLeft / 60);
+            const s = timerLeft % 60;
+            document.getElementById('timer-text').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            const offset = 427 - (427 * (15*60 - timerLeft)) / (15*60);
+            document.getElementById('timer-ring').style.strokeDashoffset = offset;
+        }
+
+        function showPopup(msg) {
+            const p = document.getElementById('ai-popup');
+            document.getElementById('popup-text').innerText = msg;
+            p.style.transform = "translateY(0)";
+            setTimeout(hidePopup, 4000);
+        }
+
+        function hidePopup() {
+            document.getElementById('ai-popup').style.transform = "translateY(-200%)";
+        }
+
+        function addGratitude() {
+            const inp = document.getElementById('grat-input');
+            if(!inp.value) return;
+            const div = document.createElement('div');
+            div.className = "p-3 bg-white border border-indigo-50 rounded-xl text-xs text-indigo-700 shadow-sm";
+            div.innerText = `✨ ${inp.value}`;
+            document.getElementById('grat-list').prepend(div);
+            inp.value = "";
+        }
+
+        window.onload = () => {
+            const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+            document.getElementById('date-display').innerText = new Date().toLocaleDateString('ar-EG', opts);
+            renderTasks();
+            renderLessons();
+            setInterval(() => {
+                const w = state.wisdom[Math.floor(Math.random() * state.wisdom.length)];
+                showPopup(w);
+            }, 90000);
+        }
+    </script>
+</body>
+</html>
+
+
+
